@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RitualBoard - Habit Tracker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --glass-1: #E3F6F5;
+            --glass-2: #BAE8E8;
+            --glass-3: #90DDF0;
+            --glass-4: #5D5D81;
+            --glass-5: #3A3A58;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--glass-1), var(--glass-2));
+            min-height: 100vh;
+            color: var(--glass-5);
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--glass-5);
+            display: flex;
+            align-items: center;
+        }
+
+        .logo i {
+            margin-right: 10px;
+            color: var(--glass-4);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--glass-3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--glass-5);
+            font-weight: bold;
+            cursor: pointer;
+            border: 2px solid var(--glass-4);
+        }
+
+        .time-filters {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 10px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 6px var(--shadow);
+        }
+
+        .time-filter {
+            padding: 8px 15px;
+            border-radius: 15px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .time-filter.active {
+            background-color: var(--glass-4);
+            color: white;
+        }
+
+        .board {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .board-column {
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 15px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 6px var(--shadow);
+        }
+
+        .column-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(93, 93, 129, 0.2);
+        }
+
+        .column-title {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .column-count {
+            background-color: var(--glass-4);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .habit-list {
+            min-height: 50px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .habit-item {
+            background-color: white;
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            cursor: grab;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 2px 4px var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .habit-item:active {
+            cursor: grabbing;
+        }
+
+        .habit-item.dragging {
+            opacity: 0.8;
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .habit-emoji {
+            font-size: 24px;
+            margin-right: 15px;
+            width: 40px;
+            height: 40px;
+            background-color: var(--glass-1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .habit-details {
+            flex: 1;
+        }
+
+        .habit-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .habit-meta {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 12px;
+            color: var(--glass-4);
+        }
+
+        .habit-time {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .streak-counter {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 700;
+            color: var(--glass-5);
+        }
+
+        .streak-fire {
+            color: #FF6B6B;
+        }
+
+        .habit-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .check-button {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            border: 2px solid var(--glass-3);
+            background-color: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--glass-3);
+            transition: all 0.3s ease;
+        }
+
+        .check-button.checked {
+            background-color: var(--glass-3);
+            color: white;
+            border-color: var(--glass-3);
+        }
+
+        .progress-bar {
+            height: 4px;
+            background-color: rgba(93, 93, 129, 0.1);
+            border-radius: 2px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--glass-3);
+            border-radius: 2px;
+            transition: width 0.5s ease;
+        }
+
+        .add-habit {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--glass-4);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 10px rgba(58, 58, 88, 0.3);
+            cursor: pointer;
+            z-index: 10;
+            transition: transform 0.3s ease;
+        }
+
+        .add-habit:hover {
+            transform: scale(1.1);
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background-color: white;
+            width: 90%;
+            max-width: 400px;
+            border-radius: 20px;
+            padding: 25px;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: var(--glass-1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: var(--glass-5);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: var(--glass-4);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 1px solid var(--glass-2);
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--glass-3);
+        }
+
+        .emoji-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .emoji-option {
+            font-size: 24px;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .emoji-option:hover {
+            background-color: var(--glass-1);
+        }
+
+        .emoji-option.selected {
+            background-color: var(--glass-3);
+            color: white;
+        }
+
+        .time-options {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .time-option {
+            padding: 8px 12px;
+            border-radius: 20px;
+            background-color: var(--glass-1);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .time-option.selected {
+            background-color: var(--glass-4);
+            color: white;
+        }
+
+        .form-submit {
+            width: 100%;
+            padding: 15px;
+            border-radius: 12px;
+            background-color: var(--glass-4);
+            color: white;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .form-submit:hover {
+            background-color: var(--glass-5);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--glass-4);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(58, 58, 88, 0.3);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notification.show {
+            opacity: 1;
+        }
+
+        .celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .celebration.active {
+            opacity: 1;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: var(--glass-3);
+            opacity: 0;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .app-container {
+                padding: 15px;
+            }
+            
+            .time-filters {
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+            
+            .time-filter {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-cloud-sun-rain"></i>
+                <span>RitualBoard</span>
+            </div>
+            <div class="user-avatar">JS</div>
+        </header>
+
+        <div class="time-filters">
+            <div class="time-filter active" data-time="all">All</div>
+            <div class="time-filter" data-time="morning">Morning</div>
+            <div class="time-filter" data-time="afternoon">Afternoon</div>
+            <div class="time-filter" data-time="evening">Evening</div>
+            <div class="time-filter" data-time="night">Night</div>
+        </div>
+
+        <div class="board">
+            <div class="board-column">
+                <div class="column-header">
+                    <div class="column-title">
+                        <i class="fas fa-list-ul"></i>
+                        <span>To Do</span>
+                        <span class="column-count" id="todo-count">0</span>
+                    </div>
+                </div>
+                <div class="habit-list" id="todo-list">
+                    <!-- Habits will be added here dynamically -->
+                </div>
+            </div>
+
+            <div class="board-column">
+                <div class="column-header">
+                    <div class="column-title">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Completed</span>
+                        <span class="column-count" id="completed-count">0</span>
+                    </div>
+                </div>
+                <div class="habit-list" id="completed-list">
+                    <!-- Completed habits will be added here dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <div class="add-habit" id="add-habit-btn">
+            <i class="fas fa-plus"></i>
+        </div>
+
+        <div class="modal" id="habit-modal">
+            <div class="modal-content">
+                <div class="modal-close" id="close-modal">
+                    <i class="fas fa-times"></i>
+                </div>
+                <h2 class="modal-title">Create New Habit</h2>
+                <form id="habit-form">
+                    <div class="form-group">
+                        <label class="form-label" for="habit-name">Habit Name</label>
+                        <input type="text" class="form-input" id="habit-name" placeholder="e.g. Morning Meditation" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Select Emoji</label>
+                        <div class="emoji-selector" id="emoji-selector">
+                            <div class="emoji-option" data-emoji="🧘">🧘</div>
+                            <div class="emoji-option" data-emoji="🏃">🏃</div>
+                            <div class="emoji-option" data-emoji="📖">📖</div>
+                            <div class="emoji-option" data-emoji="💧">💧</div>
+                            <div class="emoji-option" data-emoji="🍎">🍎</div>
+                            <div class="emoji-option" data-emoji="🛌">🛌</div>
+                            <div class="emoji-option" data-emoji="✍️">✍️</div>
+                            <div class="emoji-option" data-emoji="🎯">🎯</div>
+                        </div>
+                        <input type="hidden" id="selected-emoji" value="🧘">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Time of Day</label>
+                        <div class="time-options" id="time-options">
+                            <div class="time-option selected" data-time="morning">
+                                <i class="fas fa-sun"></i> Morning
+                            </div>
+                            <div class="time-option" data-time="afternoon">
+                                <i class="fas fa-cloud-sun"></i> Afternoon
+                            </div>
+                            <div class="time-option" data-time="evening">
+                                <i class="fas fa-moon"></i> Evening
+                            </div>
+                            <div class="time-option" data-time="night">
+                                <i class="fas fa-star"></i> Night
+                            </div>
+                        </div>
+                        <input type="hidden" id="selected-time" value="morning">
+                    </div>
+
+                    <button type="submit" class="form-submit">Add Habit</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="notification" id="notification">
+            <i class="fas fa-check-circle"></i>
+            <span id="notification-message">Habit added successfully!</span>
+        </div>
+
+        <div class="celebration" id="celebration">
+            <!-- Confetti will be added here dynamically -->
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const addHabitBtn = document.getElementById('add-habit-btn');
+            const habitModal = document.getElementById('habit-modal');
+            const closeModalBtn = document.getElementById('close-modal');
+            const habitForm = document.getElementById('habit-form');
+            const todoList = document.getElementById('todo-list');
+            const completedList = document.getElementById('completed-list');
+            const todoCount = document.getElementById('todo-count');
+            const completedCount = document.getElementById('completed-count');
+            const timeFilters = document.querySelectorAll('.time-filter');
+            const notification = document.getElementById('notification');
+            const notificationMessage = document.getElementById('notification-message');
+            const celebration = document.getElementById('celebration');
+            
+            // Emoji and Time Selection
+            const emojiOptions = document.querySelectorAll('.emoji-option');
+            const selectedEmoji = document.getElementById('selected-emoji');
+            const timeOptions = document.querySelectorAll('.time-option');
+            const selectedTime = document.getElementById('selected-time');
+            
+            // Sample data (would normally come from a database)
+            let habits = JSON.parse(localStorage.getItem('ritualBoardHabits')) || [];
+            
+            // Initialize the app
+            function init() {
+                renderHabits();
+                updateCounts();
+                setupDragAndDrop();
+                
+                // Check for any habits that need notifications
+                checkForNotifications();
+            }
+            
+            // Render all habits
+            function renderHabits() {
+                todoList.innerHTML = '';
+                completedList.innerHTML = '';
+                
+                habits.forEach(habit => {
+                    if (habit.completed) {
+                        completedList.appendChild(createHabitElement(habit));
+                    } else {
+                        todoList.appendChild(createHabitElement(habit));
+                    }
+                });
+            }
+            
+            // Create a habit DOM element
+            function createHabitElement(habit) {
+                const habitEl = document.createElement('div');
+                habitEl.className = 'habit-item';
+                habitEl.dataset.id = habit.id;
+                habitEl.dataset.time = habit.time;
+                
+                const today = new Date().toISOString().split('T')[0];
+                const isTodayCompleted = habit.completedDates.includes(today);
+                
+                habitEl.innerHTML = `
+                    <div class="habit-emoji">${habit.emoji}</div>
+                    <div class="habit-details">
+                        <div class="habit-name">${habit.name}</div>
+                        <div class="habit-meta">
+                            <div class="habit-time">
+                                <i class="fas fa-clock"></i>
+                                <span>${formatTimeDisplay(habit.time)}</span>
+                            </div>
+                            <div class="streak-counter">
+                                <i class="fas fa-fire streak-fire"></i>
+                                <span>${habit.streak}</span>
+                            </div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${calculateCompletionPercentage(habit)}%"></div>
+                        </div>
+                    </div>
+                    <div class="habit-actions">
+                        <button class="check-button ${isTodayCompleted ? 'checked' : ''}">
+                            <i class="fas fa-check"></i>
+                        </button>
+                    </div>
+                `;
+                
+                // Add event listener to the check button
+                const checkButton = habitEl.querySelector('.check-button');
+                checkButton.addEventListener('click', () => toggleHabitCompletion(habit.id));
+                
+                return habitEl;
+            }
+            
+            // Format time for display
+            function formatTimeDisplay(time) {
+                const timeMap = {
+                    morning: 'Morning',
+                    afternoon: 'Afternoon',
+                    evening: 'Evening',
+                    night: 'Night'
+                };
+                return timeMap[time] || time;
+            }
+            
+            // Calculate completion percentage for the week
+            function calculateCompletionPercentage(habit) {
+                const oneWeekAgo = new Date();
+                oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+                
+                const recentCompletions = habit.completedDates.filter(date => {
+                    const completionDate = new Date(date);
+                    return completionDate >= oneWeekAgo;
+                });
+                
+                return Math.min((recentCompletions.length / 7) * 100, 100);
+            }
+            
+            // Update the counts in the column headers
+            function updateCounts() {
+                const todoHabits = habits.filter(habit => !habit.completed);
+                const completedHabits = habits.filter(habit => habit.completed);
+                
+                todoCount.textContent = todoHabits.length;
+                completedCount.textContent = completedHabits.length;
+            }
+            
+            // Toggle habit completion status
+            function toggleHabitCompletion(habitId) {
+                const habitIndex = habits.findIndex(h => h.id === habitId);
+                if (habitIndex === -1) return;
+                
+                const habit = habits[habitIndex];
+                const today = new Date().toISOString().split('T')[0];
+                
+                if (habit.completedDates.includes(today)) {
+                    // Remove today's completion
+                    habit.completedDates = habit.completedDates.filter(d => d !== today);
+                    
+                    // Update streak
+                    const yesterday = new Date();
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    const yesterdayStr = yesterday.toISOString().split('T')[0];
+                    
+                    if (!habit.completedDates.includes(yesterdayStr)) {
+                        habit.streak = 0;
+                    }
+                } else {
+                    // Add today's completion
+                    habit.completedDates.push(today);
+                    
+                    // Update streak
+                    const yesterday = new Date();
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    const yesterdayStr = yesterday.toISOString().split('T')[0];
+                    
+                    if (habit.completedDates.includes(yesterdayStr) || habit.completedDates.length === 1) {
+                        habit.streak++;
+                    } else {
+                        habit.streak = 1;
+                    }
+                    
+                    // Show celebration for streaks of 3 or more
+                    if (habit.streak >= 3) {
+                        showCelebration();
+                    }
+                }
+                
+                // Save and re-render
+                saveHabits();
+                renderHabits();
+                updateCounts();
+                
+                // Show notification
+                showNotification(`Habit ${habit.completedDates.includes(today) ? 'completed!' : 'marked incomplete'}`);
+            }
+            
+            // Setup drag and drop functionality
+            function setupDragAndDrop() {
+                const habitItems = document.querySelectorAll('.habit-item');
+                
+                habitItems.forEach(item => {
+                    item.draggable = true;
+                    
+                    item.addEventListener('dragstart', () => {
+                        item.classList.add('dragging');
+                    });
+                    
+                    item.addEventListener('dragend', () => {
+                        item.classList.remove('dragging');
+                    });
+                });
+                
+                const lists = [todoList, completedList];
+                
+                lists.forEach(list => {
+                    list.addEventListener('dragover', e => {
+                        e.preventDefault();
+                        const draggingItem = document.querySelector('.dragging');
+                        if (draggingItem && draggingItem.parentElement !== list) {
+                            const afterElement = getDragAfterElement(list, e.clientY);
+                            if (afterElement) {
+                                list.insertBefore(draggingItem, afterElement);
+                            } else {
+                                list.appendChild(draggingItem);
+                            }
+                            
+                            // Update the habit's completed status based on which list it's in
+                            const habitId = draggingItem.dataset.id;
+                            const newCompletedStatus = list.id === 'completed-list';
+                            updateHabitCompletionStatus(habitId, newCompletedStatus);
+                        }
+                    });
+                });
+            }
+            
+            // Helper function for drag and drop positioning
+            function getDragAfterElement(container, y) {
+                const draggableElements = [...container.querySelectorAll('.habit-item:not(.dragging)')];
+                
+                return draggableElements.reduce((closest, child) => {
+                    const box = child.getBoundingClientRect();
+                    const offset = y - box.top - box.height / 2;
+                    
+                    if (offset < 0 && offset > closest.offset) {
+                        return { offset: offset, element: child };
+                    } else {
+                        return closest;
+                    }
+                }, { offset: Number.NEGATIVE_INFINITY }).element;
+            }
+            
+            // Update habit completion status after drag and drop
+            function updateHabitCompletionStatus(habitId, completed) {
+                const habitIndex = habits.findIndex(h => h.id === habitId);
+                if (habitIndex === -1) return;
+                
+                habits[habitIndex].completed = completed;
+                saveHabits();
+                updateCounts();
+                
+                showNotification(`Habit moved to ${completed ? 'Completed' : 'To Do'}`);
+            }
+            
+            // Save habits to localStorage
+            function saveHabits() {
+                localStorage.setItem('ritualBoardHabits', JSON.stringify(habits));
+            }
+            
+            // Show notification
+            function showNotification(message) {
+                notificationMessage.textContent = message;
+                notification.classList.add('show');
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+            
+            // Show celebration animation
+            function showCelebration() {
+                celebration.innerHTML = '';
+                
+                // Create confetti
+                for (let i = 0; i < 50; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = `${Math.random() * 100}%`;
+                    confetti.style.backgroundColor = getRandomColor();
+                    confetti.style.animation = `confetti-fall ${Math.random() * 3 + 2}s linear forwards`;
+                    confetti.style.animationDelay = `${Math.random() * 0.5}s`;
+                    celebration.appendChild(confetti);
+                }
+                
+                celebration.classList.add('active');
+                
+                setTimeout(() => {
+                    celebration.classList.remove('active');
+                }, 3000);
+            }
+            
+            // Get random color for confetti
+            function getRandomColor() {
+                const colors = ['#E3F6F5', '#BAE8E8', '#90DDF0', '#5D5D81', '#3A3A58'];
+                return colors[Math.floor(Math.random() * colors.length)];
+            }
+            
+            // Check for notifications (simulated)
+            function checkForNotifications() {
+                // In a real app, this would check scheduled times and send notifications
+                // For demo purposes, we'll just simulate one
+                setTimeout(() => {
+                    const morningHabits = habits.filter(h => h.time === 'morning' && !h.completed);
+                    if (morningHabits.length > 0) {
+                        showNotification(`Good morning! You have ${morningHabits.length} morning habits to complete.`);
+                    }
+                }, 2000);
+            }
+            
+            // Time filter functionality
+            timeFilters.forEach(filter => {
+                filter.addEventListener('click', () => {
+                    timeFilters.forEach(f => f.classList.remove('active'));
+                    filter.classList.add('active');
+                    
+                    const time = filter.dataset.time;
+                    filterHabitsByTime(time);
+                });
+            });
+            
+            // Filter habits by time of day
+            function filterHabitsByTime(time) {
+                const habitItems = document.querySelectorAll('.habit-item');
+                
+                habitItems.forEach(item => {
+                    if (time === 'all' || item.dataset.time === time) {
+                        item.style.display = 'flex';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            }
+            
+            // Modal functionality
+            addHabitBtn.addEventListener('click', () => {
+                habitModal.classList.add('active');
+            });
+            
+            closeModalBtn.addEventListener('click', () => {
+                habitModal.classList.remove('active');
+            });
+            
+            // Close modal when clicking outside
+            habitModal.addEventListener('click', (e) => {
+                if (e.target === habitModal) {
+                    habitModal.classList.remove('active');
+                }
+            });
+            
+            // Emoji selection
+            emojiOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    emojiOptions.forEach(o => o.classList.remove('selected'));
+                    option.classList.add('selected');
+                    selectedEmoji.value = option.dataset.emoji;
+                });
+            });
+            
+            // Time selection
+            timeOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    timeOptions.forEach(o => o.classList.remove('selected'));
+                    option.classList.add('selected');
+                    selectedTime.value = option.dataset.time;
+                });
+            });
+            
+            // Form submission
+            habitForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const name = document.getElementById('habit-name').value;
+                const emoji = selectedEmoji.value;
+                const time = selectedTime.value;
+                
+                const newHabit = {
+                    id: Date.now().toString(),
+                    name,
+                    emoji,
+                    time,
+                    completed: false,
+                    streak: 0,
+                    completedDates: []
+                };
+                
+                habits.push(newHabit);
+                saveHabits();
+                renderHabits();
+                updateCounts();
+                
+                // Reset form
+                habitForm.reset();
+                habitModal.classList.remove('active');
+                
+                // Show notification
+                showNotification('Habit added successfully!');
+                
+                // Scroll to the new habit
+                setTimeout(() => {
+                    const newHabitEl = document.querySelector(`[data-id="${newHabit.id}"]`);
+                    if (newHabitEl) {
+                        newHabitEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }
+                }, 100);
+            });
+            
+            // Initialize the app
+            init();
+        });
+    </script>
+</body>
+</html>
